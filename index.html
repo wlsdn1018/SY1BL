@@ -1016,7 +1016,7 @@
         let uploadedMaterials = [];
 
         // 삭제 비밀번호 설정 (원하는 비밀번호로 변경 가능)
-        const DELETE_PASSWORD = 1111
+        const DELETE_PASSWORD = '1111'; // 삭제 비밀번호
 
         // 비밀번호 확인 함수
         function checkDeletePassword() {
@@ -1048,13 +1048,17 @@
 
         // 알림 소리 생성 (Web Audio API)
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        let notificationTimeouts = []; // 알림 타임아웃 저장
         
         function playNotificationSound() {
             if (!notificationsEnabled) return;
             
+            // 기존 타임아웃 모두 제거
+            stopNotificationSound();
+            
             // 10회 반복 알림음
             for (let i = 0; i < 10; i++) {
-                setTimeout(() => {
+                const timeout = setTimeout(() => {
                     // 첫 번째 음
                     const oscillator1 = audioContext.createOscillator();
                     const gainNode1 = audioContext.createGain();
@@ -1092,7 +1096,15 @@
                     }, 150);
                     
                 }, i * 700); // 0.7초 간격으로 10회 반복
+                
+                notificationTimeouts.push(timeout);
             }
+        }
+        
+        // 알림 소리 중지
+        function stopNotificationSound() {
+            notificationTimeouts.forEach(timeout => clearTimeout(timeout));
+            notificationTimeouts = [];
         }
 
         // 진동 (모바일) - 강화
@@ -1131,10 +1143,13 @@
             // setTimeout 제거
         }
 
-        // 알림 수동으로 닫기
+        // 알림 수동으로 닫기 (소리도 함께 중지)
         function closeNotification() {
             const toast = document.getElementById('notification-toast');
             toast.classList.remove('show');
+            
+            // 알림 소리 중지
+            stopNotificationSound();
         }
 
         // 알림 토글
