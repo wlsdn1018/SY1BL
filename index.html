@@ -1015,6 +1015,26 @@
         let outgoing = [];
         let uploadedMaterials = [];
 
+        // 삭제 비밀번호 설정 (원하는 비밀번호로 변경 가능)
+        const DELETE_PASSWORD = '1234'; // 이 부분을 원하는 비밀번호로 변경하세요
+
+        // 비밀번호 확인 함수
+        function checkDeletePassword() {
+            const inputPassword = prompt('삭제하려면 비밀번호를 입력하세요:');
+            
+            if (inputPassword === null) {
+                // 취소 버튼 클릭
+                return false;
+            }
+            
+            if (inputPassword === DELETE_PASSWORD) {
+                return true;
+            } else {
+                alert('비밀번호가 틀렸습니다. 삭제할 수 없습니다.');
+                return false;
+            }
+        }
+
         // 알림 설정
         let notificationsEnabled = localStorage.getItem('notificationsEnabled') !== 'false';
         let isFirstLoad = true; // 초기 로드 시 알림 방지
@@ -1473,6 +1493,11 @@
 
         // 공지사항 삭제
         function deleteNotice(id) {
+            // 비밀번호 확인
+            if (!checkDeletePassword()) {
+                return;
+            }
+            
             if (!confirm('이 공지사항을 삭제하시겠습니까?')) return;
             
             database.ref('notices/' + id).remove()
@@ -1486,6 +1511,11 @@
 
         // 팀별 업무현황 삭제
         function deleteTeamStatus(id) {
+            // 비밀번호 확인
+            if (!checkDeletePassword()) {
+                return;
+            }
+            
             if (!confirm('이 업무현황을 삭제하시겠습니까?')) return;
             
             database.ref('teamStatuses/' + id).remove()
@@ -2105,6 +2135,11 @@
 
         // 자재 삭제
         function deleteMaterial(id) {
+            // 비밀번호 확인
+            if (!checkDeletePassword()) {
+                return;
+            }
+            
             if (!confirm('이 자재를 삭제하시겠습니까?\n관련된 모든 입출고 내역도 함께 삭제됩니다.')) return;
             
             const relatedIncoming = incoming.filter(i => i.materialId === id);
@@ -2131,6 +2166,11 @@
 
         // 입고 삭제
         function deleteIncoming(id) {
+            // 비밀번호 확인
+            if (!checkDeletePassword()) {
+                return;
+            }
+            
             if (!confirm('이 입고 내역을 삭제하시겠습니까?')) return;
             
             database.ref('incoming/' + id).remove()
@@ -2144,6 +2184,11 @@
 
         // 출고 삭제
         function deleteOutgoing(id) {
+            // 비밀번호 확인
+            if (!checkDeletePassword()) {
+                return;
+            }
+            
             if (!confirm('이 사용(출고) 내역을 삭제하시겠습니까?')) return;
             
             database.ref('outgoing/' + id).remove()
