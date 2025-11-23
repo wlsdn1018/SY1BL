@@ -378,6 +378,100 @@
             100% { transform: rotate(360deg); }
         }
 
+        /* 알림 토스트 */
+        .notification-toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            z-index: 10000;
+            display: none;
+            animation: slideIn 0.3s ease-out;
+            max-width: 350px;
+        }
+
+        .notification-toast.show {
+            display: block;
+        }
+
+        .notification-toast.notice {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .notification-toast.team {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .notification-toast.material {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .notification-toast.incoming {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .notification-toast.outgoing {
+            background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notification-header {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .notification-body {
+            font-size: 14px;
+            opacity: 0.95;
+        }
+
+        /* 알림 설정 버튼 */
+        .notification-settings {
+            position: fixed;
+            top: 60px;
+            right: 10px;
+            z-index: 999;
+        }
+
+        .notification-toggle {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+        }
+
+        .notification-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .notification-toggle.disabled {
+            background: #ccc;
+            border-color: #999;
+        }
+
         @media (max-width: 768px) {
             .form-row {
                 grid-template-columns: 1fr;
@@ -410,6 +504,19 @@
     <!-- Firebase 연결 상태 -->
     <div class="firebase-status loading" id="firebase-status">
         <span>●</span> 연결 중...
+    </div>
+
+    <!-- 알림 설정 버튼 -->
+    <div class="notification-settings">
+        <button class="notification-toggle" id="notification-toggle" onclick="toggleNotifications()" title="알림 설정">
+            🔔
+        </button>
+    </div>
+
+    <!-- 알림 토스트 -->
+    <div class="notification-toast" id="notification-toast">
+        <div class="notification-header" id="notification-header"></div>
+        <div class="notification-body" id="notification-body"></div>
     </div>
 
     <div class="container">
@@ -908,11 +1015,117 @@
         let outgoing = [];
         let uploadedMaterials = [];
 
+        // 알림 설정
+        let notificationsEnabled = localStorage.getItem('notificationsEnabled') !== 'false';
+        let isFirstLoad = true; // 초기 로드 시 알림 방지
+        let previousDataCount = {
+            notices: 0,
+            teamStatuses: 0,
+            materials: 0,
+            incoming: 0,
+            outgoing: 0
+        };
+
+        // 알림 소리 생성 (Web Audio API)
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playNotificationSound() {
+            if (!notificationsEnabled) return;
+            
+            // 간단한 알림음 생성
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.3);
+        }
+
+        // 진동 (모바일)
+        function vibrate() {
+            if (!notificationsEnabled) return;
+            
+            if (navigator.vibrate) {
+                navigator.vibrate([200, 100, 200]); // 짧은 진동 패턴
+            }
+        }
+
+        // 알림 토스트 표시
+        function showNotificationToast(type, title, message) {
+            if (!notificationsEnabled || isFirstLoad) return;
+            
+            const toast = document.getElementById('notification-toast');
+            const header = document.getElementById('notification-header');
+            const body = document.getElementById('notification-body');
+            
+            // 기존 클래스 제거
+            toast.className = 'notification-toast';
+            
+            // 타입별 클래스 추가
+            toast.classList.add(type);
+            toast.classList.add('show');
+            
+            header.textContent = title;
+            body.textContent = message;
+            
+            // 소리와 진동
+            playNotificationSound();
+            vibrate();
+            
+            // 3초 후 자동 숨김
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // 알림 토글
+        function toggleNotifications() {
+            notificationsEnabled = !notificationsEnabled;
+            localStorage.setItem('notificationsEnabled', notificationsEnabled);
+            
+            const toggleBtn = document.getElementById('notification-toggle');
+            
+            if (notificationsEnabled) {
+                toggleBtn.textContent = '🔔';
+                toggleBtn.classList.remove('disabled');
+                toggleBtn.title = '알림 켜짐 (클릭하여 끄기)';
+                showAlert('dashboard-alert', '알림이 활성화되었습니다.', 'success');
+            } else {
+                toggleBtn.textContent = '🔕';
+                toggleBtn.classList.add('disabled');
+                toggleBtn.title = '알림 꺼짐 (클릭하여 켜기)';
+                showAlert('dashboard-alert', '알림이 비활성화되었습니다.', 'warning');
+            }
+        }
+
         // 초기화
         document.addEventListener('DOMContentLoaded', function() {
             setTodayDate();
             setupFirebaseListeners();
             loadAllData();
+            
+            // 알림 버튼 초기 상태 설정
+            const toggleBtn = document.getElementById('notification-toggle');
+            if (!notificationsEnabled) {
+                toggleBtn.textContent = '🔕';
+                toggleBtn.classList.add('disabled');
+                toggleBtn.title = '알림 꺼짐 (클릭하여 켜기)';
+            } else {
+                toggleBtn.title = '알림 켜짐 (클릭하여 끄기)';
+            }
+            
+            // 3초 후 첫 로드 완료로 설정 (이후부터 알림 활성화)
+            setTimeout(() => {
+                isFirstLoad = false;
+            }, 3000);
         });
 
         // Firebase 실시간 리스너 설정
@@ -920,7 +1133,16 @@
             // 공지사항 실시간 동기화
             database.ref('notices').on('value', (snapshot) => {
                 const data = snapshot.val();
-                notices = data ? Object.values(data) : [];
+                const newNotices = data ? Object.values(data) : [];
+                
+                // 새 데이터 감지
+                if (!isFirstLoad && newNotices.length > previousDataCount.notices) {
+                    const newItem = newNotices[newNotices.length - 1];
+                    showNotificationToast('notice', '📢 새 공지사항', newItem.title);
+                }
+                
+                previousDataCount.notices = newNotices.length;
+                notices = newNotices;
                 loadNotices();
                 loadDashboardNotices();
             });
@@ -928,7 +1150,16 @@
             // 팀별 업무현황 실시간 동기화
             database.ref('teamStatuses').on('value', (snapshot) => {
                 const data = snapshot.val();
-                teamStatuses = data ? Object.values(data) : [];
+                const newStatuses = data ? Object.values(data) : [];
+                
+                // 새 데이터 감지
+                if (!isFirstLoad && newStatuses.length > previousDataCount.teamStatuses) {
+                    const newItem = newStatuses[newStatuses.length - 1];
+                    showNotificationToast('team', '👥 새 업무현황', `${newItem.teamName}: ${newItem.content.substring(0, 30)}...`);
+                }
+                
+                previousDataCount.teamStatuses = newStatuses.length;
+                teamStatuses = newStatuses;
                 loadTeamStatuses();
                 loadDashboardTeamStatuses();
             });
@@ -936,7 +1167,16 @@
             // 자재 목록 실시간 동기화
             database.ref('materials').on('value', (snapshot) => {
                 const data = snapshot.val();
-                materials = data ? Object.values(data) : [];
+                const newMaterials = data ? Object.values(data) : [];
+                
+                // 새 데이터 감지
+                if (!isFirstLoad && newMaterials.length > previousDataCount.materials) {
+                    const newItem = newMaterials[newMaterials.length - 1];
+                    showNotificationToast('material', '📦 새 자재 등록', `${newItem.name} (${newItem.spec})`);
+                }
+                
+                previousDataCount.materials = newMaterials.length;
+                materials = newMaterials;
                 loadMaterials();
                 updateDashboard();
                 updateMaterialSelects();
@@ -946,7 +1186,19 @@
             // 입고 내역 실시간 동기화
             database.ref('incoming').on('value', (snapshot) => {
                 const data = snapshot.val();
-                incoming = data ? Object.values(data) : [];
+                const newIncoming = data ? Object.values(data) : [];
+                
+                // 새 데이터 감지
+                if (!isFirstLoad && newIncoming.length > previousDataCount.incoming) {
+                    const newItem = newIncoming[newIncoming.length - 1];
+                    const material = materials.find(m => m.id === newItem.materialId);
+                    if (material) {
+                        showNotificationToast('incoming', '📥 새 입고', `${material.name} ${newItem.quantity}${material.unit}`);
+                    }
+                }
+                
+                previousDataCount.incoming = newIncoming.length;
+                incoming = newIncoming;
                 loadIncoming();
                 updateDashboard();
                 updateOutgoingMaterialSelects();
@@ -955,7 +1207,19 @@
             // 출고 내역 실시간 동기화
             database.ref('outgoing').on('value', (snapshot) => {
                 const data = snapshot.val();
-                outgoing = data ? Object.values(data) : [];
+                const newOutgoing = data ? Object.values(data) : [];
+                
+                // 새 데이터 감지
+                if (!isFirstLoad && newOutgoing.length > previousDataCount.outgoing) {
+                    const newItem = newOutgoing[newOutgoing.length - 1];
+                    const material = materials.find(m => m.id === newItem.materialId);
+                    if (material) {
+                        showNotificationToast('outgoing', '📤 새 사용(출고)', `${material.name} ${newItem.quantity}${material.unit}`);
+                    }
+                }
+                
+                previousDataCount.outgoing = newOutgoing.length;
+                outgoing = newOutgoing;
                 loadOutgoing();
                 updateDashboard();
             });
