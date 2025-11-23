@@ -1,0 +1,1904 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>공사관리 프로그램</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            background: white;
+            min-height: 100vh;
+            padding: 0;
+            margin: 0;
+        }
+
+        .container {
+            width: 100%;
+            height: 100vh;
+            margin: 0;
+            background: white;
+            overflow: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            margin: 0;
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f5f5f5;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            background: #f5f5f5;
+            border: none;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            background: #e0e0e0;
+        }
+
+        .tab.active {
+            background: white;
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-section {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 15px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: #138496;
+        }
+
+        .search-box {
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #667eea;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        tr:hover {
+            background: #f5f5f5;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 5px;
+        }
+
+        .action-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .stat-card h3 {
+            font-size: 14px;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        .low-stock {
+            background: #ffebee !important;
+        }
+
+        .low-stock td:last-child::after {
+            content: " ⚠️";
+            color: #f44336;
+        }
+
+        .completed-item {
+            text-decoration: line-through;
+            text-decoration-color: #f44336;
+            text-decoration-thickness: 2px;
+            opacity: 0.7;
+        }
+
+        .checkbox-cell {
+            text-align: center;
+        }
+
+        .checkbox-cell input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        @media print {
+            .tabs, .btn-group, .search-box, .action-btns {
+                display: none !important;
+            }
+            
+            body {
+                background: white;
+            }
+            
+            .container {
+                box-shadow: none;
+            }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 600px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .close {
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #aaa;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏗️ 공사관리 프로그램</h1>
+            <p>자재 관리 및 업무 현황 통합 시스템</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('dashboard')">📊 대시보드</button>
+            <button class="tab" onclick="showTab('notices')">📢 공지사항</button>
+            <button class="tab" onclick="showTab('team-status')">👥 팀별 업무현황</button>
+            <button class="tab" onclick="showTab('materials')">📦 자재 목록</button>
+            <button class="tab" onclick="showTab('incoming')">📥 입고 관리</button>
+            <button class="tab" onclick="showTab('outgoing')">📤 사용(출고) 관리</button>
+            <button class="tab" onclick="showTab('history')">📋 전체 내역</button>
+        </div>
+
+        <!-- 대시보드 탭 -->
+        <div id="dashboard" class="tab-content active">
+            <div class="alert" id="dashboard-alert"></div>
+            
+            <div class="stats-container">
+                <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <h3>📢 공지사항 (최근 5개)</h3>
+                    <div id="notice-list" style="margin-top: 15px; max-height: 200px; overflow-y: auto;">
+                        <p style="text-align: center; color: rgba(255,255,255,0.7); padding: 20px;">등록된 공지사항이 없습니다.</p>
+                    </div>
+                    <button onclick="showTab('notices'); event.stopPropagation();" class="btn btn-primary" style="margin-top: 10px; width: 100%; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">공지사항 관리</button>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                    <h3>👥 팀별 업무현황 (최근 5개)</h3>
+                    <div id="team-status-list" style="margin-top: 15px; max-height: 200px; overflow-y: auto;">
+                        <p style="text-align: center; color: rgba(255,255,255,0.7); padding: 20px;">등록된 업무현황이 없습니다.</p>
+                    </div>
+                    <button onclick="showTab('team-status'); event.stopPropagation();" class="btn btn-primary" style="margin-top: 10px; width: 100%; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">업무현황 관리</button>
+                </div>
+            </div>
+
+            <h2 style="margin-bottom: 15px;">📋 자재 현황</h2>
+            <div class="table-container">
+                <table id="low-stock-table">
+                    <thead>
+                        <tr>
+                            <th>번호</th>
+                            <th>품명</th>
+                            <th>규격</th>
+                            <th>단위</th>
+                            <th>계약수량</th>
+                            <th>입고수량</th>
+                            <th>사용수량</th>
+                            <th>잔여수량</th>
+                            <th>부족률</th>
+                            <th>비고</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 공지사항 탭 -->
+        <div id="notices" class="tab-content">
+            <div class="alert" id="notices-alert"></div>
+            
+            <div class="form-section">
+                <h2 style="margin-bottom: 15px;">📢 공지사항 등록</h2>
+                <form id="notice-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>제목 *</label>
+                            <input type="text" id="notice-title" required>
+                        </div>
+                        <div class="form-group">
+                            <label>작성일 *</label>
+                            <input type="date" id="notice-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label>완료기한</label>
+                            <input type="date" id="notice-deadline">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>내용 *</label>
+                            <textarea id="notice-content" required style="min-height: 100px;"></textarea>
+                        </div>
+                    </div>
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-primary">공지사항 등록</button>
+                        <button type="button" class="btn btn-warning" onclick="resetNoticeForm()">초기화</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="search-box">
+                <input type="text" id="notice-search" placeholder="🔍 제목, 내용으로 검색..." onkeyup="searchNotices()">
+            </div>
+
+            <div class="table-container">
+                <table id="notices-table">
+                    <thead>
+                        <tr>
+                            <th>번호</th>
+                            <th>완료</th>
+                            <th>제목</th>
+                            <th>내용</th>
+                            <th>작성일</th>
+                            <th>완료기한</th>
+                            <th>관리</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 팀별 업무현황 탭 -->
+        <div id="team-status" class="tab-content">
+            <div class="alert" id="team-status-alert"></div>
+            
+            <div class="form-section">
+                <h2 style="margin-bottom: 15px;">👥 팀별 업무현황 등록</h2>
+                <form id="team-status-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>팀명 *</label>
+                            <input type="text" id="team-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>작성일 *</label>
+                            <input type="date" id="team-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label>완료기한</label>
+                            <input type="date" id="team-deadline">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>업무내용 *</label>
+                            <textarea id="team-content" required style="min-height: 100px;"></textarea>
+                        </div>
+                    </div>
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-primary">업무현황 등록</button>
+                        <button type="button" class="btn btn-warning" onclick="resetTeamStatusForm()">초기화</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="search-box">
+                <input type="text" id="team-status-search" placeholder="🔍 팀명, 업무내용으로 검색..." onkeyup="searchTeamStatus()">
+            </div>
+
+            <div class="table-container">
+                <table id="team-status-table">
+                    <thead>
+                        <tr>
+                            <th>번호</th>
+                            <th>완료</th>
+                            <th>팀명</th>
+                            <th>업무내용</th>
+                            <th>작성일</th>
+                            <th>완료기한</th>
+                            <th>관리</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 자재 목록 탭 -->
+        <div id="materials" class="tab-content">
+            <div class="alert" id="materials-alert"></div>
+            
+            <div class="form-section">
+                <h2 style="margin-bottom: 15px;">➕ 자재 등록</h2>
+                
+                <div style="margin-bottom: 20px; padding: 15px; background: #e3f2fd; border-radius: 5px;">
+                    <h3 style="margin-bottom: 10px;">📁 엑셀 파일 업로드 (자동 등록)</h3>
+                    <p style="font-size: 13px; color: #666; margin-bottom: 10px;">엑셀 파일 형식: 품명, 규격, 단위, 계약수량, 비고 (첫 번째 행은 헤더)</p>
+                    <p style="font-size: 13px; color: #d32f2f; margin-bottom: 10px;">※ 업로드 시 중복되지 않은 자재가 자동으로 등록됩니다.</p>
+                    <input type="file" id="excel-upload" accept=".xlsx,.xlsm,.xlsb,.xls,.csv" style="padding: 10px; border: 2px solid #2196F3; border-radius: 5px; background: white;">
+                    <button type="button" class="btn btn-info" onclick="uploadExcel()" style="margin-left: 10px;">업로드 및 자동 등록</button>
+                </div>
+                
+                <form id="material-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>품명 *</label>
+                            <select id="mat-name" required onchange="onMaterialNameChange()">
+                                <option value="">품명을 선택하세요</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>규격 *</label>
+                            <select id="mat-spec" required>
+                                <option value="">규격을 선택하세요</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>단위 *</label>
+                            <input type="text" id="mat-unit" required list="material-unit-list">
+                            <datalist id="material-unit-list"></datalist>
+                        </div>
+                        <div class="form-group">
+                            <label>계약수량 *</label>
+                            <input type="number" id="mat-quantity" required min="0" step="0.01">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>비고</label>
+                            <textarea id="mat-note"></textarea>
+                        </div>
+                    </div>
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-primary">자재 등록</button>
+                        <button type="button" class="btn btn-warning" onclick="resetMaterialForm()">초기화</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="search-box">
+                <input type="text" id="material-search" placeholder="🔍 자재명, 규격으로 검색..." onkeyup="searchMaterials()">
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-success" onclick="exportToExcel('materials')">📥 Excel 다운로드</button>
+                <button class="btn btn-info" onclick="window.print()">🖨️ 인쇄</button>
+            </div>
+
+            <div class="table-container">
+                <table id="materials-table">
+                    <thead>
+                        <tr>
+                            <th>번호</th>
+                            <th>품명</th>
+                            <th>규격</th>
+                            <th>단위</th>
+                            <th>계약수량</th>
+                            <th>입고수량</th>
+                            <th>사용수량</th>
+                            <th>잔여수량</th>
+                            <th>비고</th>
+                            <th>관리</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 입고 관리 탭 -->
+        <div id="incoming" class="tab-content">
+            <div class="alert" id="incoming-alert"></div>
+            
+            <div class="form-section">
+                <h2 style="margin-bottom: 15px;">📥 입고 등록</h2>
+                <form id="incoming-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>품명 *</label>
+                            <select id="in-material-name" required onchange="onIncomingNameChange()">
+                                <option value="">품명을 선택하세요</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>규격 *</label>
+                            <select id="in-material-spec" required onchange="onIncomingSpecChange()">
+                                <option value="">규격을 선택하세요</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>입고일 *</label>
+                            <input type="date" id="in-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label>입고수량 *</label>
+                            <input type="number" id="in-quantity" required min="0.01" step="0.01">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>비고</label>
+                            <textarea id="in-note"></textarea>
+                        </div>
+                    </div>
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-primary">입고 등록</button>
+                        <button type="button" class="btn btn-warning" onclick="resetIncomingForm()">초기화</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="search-box">
+                <input type="text" id="incoming-search" placeholder="🔍 자재명으로 검색..." onkeyup="searchIncoming()">
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-success" onclick="exportToExcel('incoming')">📥 Excel 다운로드</button>
+            </div>
+
+            <div class="table-container">
+                <table id="incoming-table">
+                    <thead>
+                        <tr>
+                            <th>번호</th>
+                            <th>품명</th>
+                            <th>규격</th>
+                            <th>단위</th>
+                            <th>입고일</th>
+                            <th>입고수량</th>
+                            <th>비고</th>
+                            <th>관리</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 사용(출고) 관리 탭 -->
+        <div id="outgoing" class="tab-content">
+            <div class="alert" id="outgoing-alert"></div>
+            
+            <div class="form-section">
+                <h2 style="margin-bottom: 15px;">📤 사용(출고) 등록</h2>
+                <form id="outgoing-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>품명 *</label>
+                            <select id="out-material-name" required onchange="onOutgoingNameChange()">
+                                <option value="">품명을 선택하세요</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>규격 *</label>
+                            <select id="out-material-spec" required onchange="onOutgoingSpecChange()">
+                                <option value="">규격을 선택하세요</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>사용일 *</label>
+                            <input type="date" id="out-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label>사용수량 *</label>
+                            <input type="number" id="out-quantity" required min="0.01" step="0.01">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>비고</label>
+                            <textarea id="out-note"></textarea>
+                        </div>
+                    </div>
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-primary">사용 등록</button>
+                        <button type="button" class="btn btn-warning" onclick="resetOutgoingForm()">초기화</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="search-box">
+                <input type="text" id="outgoing-search" placeholder="🔍 자재명으로 검색..." onkeyup="searchOutgoing()">
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-success" onclick="exportToExcel('outgoing')">📥 Excel 다운로드</button>
+            </div>
+
+            <div class="table-container">
+                <table id="outgoing-table">
+                    <thead>
+                        <tr>
+                            <th>번호</th>
+                            <th>품명</th>
+                            <th>규격</th>
+                            <th>단위</th>
+                            <th>사용일</th>
+                            <th>사용수량</th>
+                            <th>비고</th>
+                            <th>관리</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 전체 내역 탭 -->
+        <div id="history" class="tab-content">
+            <div class="alert" id="history-alert"></div>
+            
+            <div class="search-box">
+                <input type="text" id="history-search" placeholder="🔍 자재명으로 검색..." onkeyup="searchHistory()">
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-success" onclick="exportToExcel('history')">📥 Excel 다운로드</button>
+            </div>
+
+            <div class="table-container">
+                <table id="history-table">
+                    <thead>
+                        <tr>
+                            <th>번호</th>
+                            <th>품명</th>
+                            <th>규격</th>
+                            <th>단위</th>
+                            <th>계약수량</th>
+                            <th>입고일</th>
+                            <th>입고수량</th>
+                            <th>사용일</th>
+                            <th>사용수량</th>
+                            <th>잔여수량</th>
+                            <th>비고</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- SheetJS 라이브러리 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <script>
+        // 데이터 저장소
+        let materials = JSON.parse(localStorage.getItem('materials')) || [];
+        let incoming = JSON.parse(localStorage.getItem('incoming')) || [];
+        let outgoing = JSON.parse(localStorage.getItem('outgoing')) || [];
+        let uploadedMaterials = JSON.parse(localStorage.getItem('uploadedMaterials')) || [];
+        let notices = JSON.parse(localStorage.getItem('notices')) || [];
+        let teamStatuses = JSON.parse(localStorage.getItem('teamStatuses')) || [];
+
+        // 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAllData();
+            setTodayDate();
+            updateMaterialDatalist();
+        });
+
+        function setTodayDate() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('in-date').value = today;
+            document.getElementById('out-date').value = today;
+            document.getElementById('notice-date').value = today;
+            document.getElementById('team-date').value = today;
+        }
+
+        // 공지사항 등록
+        document.getElementById('notice-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const notice = {
+                id: Date.now(),
+                title: document.getElementById('notice-title').value,
+                content: document.getElementById('notice-content').value,
+                date: document.getElementById('notice-date').value,
+                deadline: document.getElementById('notice-deadline').value || '',
+                completed: false
+            };
+            
+            notices.push(notice);
+            localStorage.setItem('notices', JSON.stringify(notices));
+            
+            showAlert('notices-alert', '공지사항이 성공적으로 등록되었습니다.', 'success');
+            resetNoticeForm();
+            loadNotices();
+        });
+
+        // 팀별 업무현황 등록
+        document.getElementById('team-status-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const teamStatus = {
+                id: Date.now(),
+                teamName: document.getElementById('team-name').value,
+                content: document.getElementById('team-content').value,
+                date: document.getElementById('team-date').value,
+                deadline: document.getElementById('team-deadline').value || '',
+                completed: false
+            };
+            
+            teamStatuses.push(teamStatus);
+            localStorage.setItem('teamStatuses', JSON.stringify(teamStatuses));
+            
+            showAlert('team-status-alert', '팀별 업무현황이 성공적으로 등록되었습니다.', 'success');
+            resetTeamStatusForm();
+            loadTeamStatuses();
+        });
+
+        // 공지사항 목록 로드
+        function loadNotices() {
+            const tbody = document.getElementById('notices-table').getElementsByTagName('tbody')[0];
+            tbody.innerHTML = '';
+            
+            // 최신순 정렬
+            const sortedNotices = [...notices].sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            sortedNotices.forEach((notice, index) => {
+                const row = tbody.insertRow();
+                const completedClass = notice.completed ? 'completed-item' : '';
+                
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td class="checkbox-cell">
+                        <input type="checkbox" ${notice.completed ? 'checked' : ''} 
+                               onchange="toggleNoticeComplete(${notice.id})">
+                    </td>
+                    <td class="${completedClass}">${notice.title}</td>
+                    <td class="${completedClass}" style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${notice.content}</td>
+                    <td class="${completedClass}">${notice.date}</td>
+                    <td class="${completedClass}">${notice.deadline || '-'}</td>
+                    <td class="action-btns">
+                        <button class="action-btn btn-danger" onclick="deleteNotice(${notice.id})">삭제</button>
+                    </td>
+                `;
+            });
+            
+            if (notices.length === 0) {
+                const row = tbody.insertRow();
+                row.innerHTML = '<td colspan="7" style="text-align: center; padding: 30px;">등록된 공지사항이 없습니다.</td>';
+            }
+        }
+
+        // 공지사항 완료 토글
+        function toggleNoticeComplete(id) {
+            const notice = notices.find(n => n.id === id);
+            if (notice) {
+                notice.completed = !notice.completed;
+                localStorage.setItem('notices', JSON.stringify(notices));
+                loadNotices();
+            }
+        }
+
+        // 팀별 업무현황 목록 로드
+        function loadTeamStatuses() {
+            const tbody = document.getElementById('team-status-table').getElementsByTagName('tbody')[0];
+            tbody.innerHTML = '';
+            
+            // 최신순 정렬
+            const sortedStatuses = [...teamStatuses].sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            sortedStatuses.forEach((status, index) => {
+                const row = tbody.insertRow();
+                const completedClass = status.completed ? 'completed-item' : '';
+                
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td class="checkbox-cell">
+                        <input type="checkbox" ${status.completed ? 'checked' : ''} 
+                               onchange="toggleTeamStatusComplete(${status.id})">
+                    </td>
+                    <td class="${completedClass}">${status.teamName}</td>
+                    <td class="${completedClass}" style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${status.content}</td>
+                    <td class="${completedClass}">${status.date}</td>
+                    <td class="${completedClass}">${status.deadline || '-'}</td>
+                    <td class="action-btns">
+                        <button class="action-btn btn-danger" onclick="deleteTeamStatus(${status.id})">삭제</button>
+                    </td>
+                `;
+            });
+            
+            if (teamStatuses.length === 0) {
+                const row = tbody.insertRow();
+                row.innerHTML = '<td colspan="7" style="text-align: center; padding: 30px;">등록된 업무현황이 없습니다.</td>';
+            }
+        }
+
+        // 팀별 업무현황 완료 토글
+        function toggleTeamStatusComplete(id) {
+            const status = teamStatuses.find(t => t.id === id);
+            if (status) {
+                status.completed = !status.completed;
+                localStorage.setItem('teamStatuses', JSON.stringify(teamStatuses));
+                loadTeamStatuses();
+            }
+        }
+
+        // 대시보드에 공지사항 표시 (최근 5개)
+        function loadDashboardNotices() {
+            const noticeList = document.getElementById('notice-list');
+            const sortedNotices = [...notices].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+            
+            if (sortedNotices.length === 0) {
+                noticeList.innerHTML = '<p style="text-align: center; color: rgba(255,255,255,0.7); padding: 20px;">등록된 공지사항이 없습니다.</p>';
+            } else {
+                noticeList.innerHTML = sortedNotices.map(notice => {
+                    const completedStyle = notice.completed ? 'text-decoration: line-through; text-decoration-color: #ff0000; opacity: 0.7;' : '';
+                    const deadlineText = notice.deadline ? `<div style="font-size: 11px; opacity: 0.7;">기한: ${notice.deadline}</div>` : '';
+                    
+                    return `
+                    <div style="background: rgba(255,255,255,0.2); padding: 10px; margin-bottom: 8px; border-radius: 5px; border-left: 3px solid white;">
+                        <div style="font-weight: bold; margin-bottom: 5px; ${completedStyle}">${notice.completed ? '✅ ' : ''}${notice.title}</div>
+                        <div style="font-size: 12px; opacity: 0.9; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; ${completedStyle}">${notice.content}</div>
+                        <div style="font-size: 11px; opacity: 0.7;">작성: ${notice.date}</div>
+                        ${deadlineText}
+                    </div>
+                `;
+                }).join('');
+            }
+        }
+
+        // 대시보드에 팀별 업무현황 표시 (최근 5개)
+        function loadDashboardTeamStatuses() {
+            const teamStatusList = document.getElementById('team-status-list');
+            const sortedStatuses = [...teamStatuses].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+            
+            if (sortedStatuses.length === 0) {
+                teamStatusList.innerHTML = '<p style="text-align: center; color: rgba(255,255,255,0.7); padding: 20px;">등록된 업무현황이 없습니다.</p>';
+            } else {
+                teamStatusList.innerHTML = sortedStatuses.map(status => {
+                    const completedStyle = status.completed ? 'text-decoration: line-through; text-decoration-color: #ff0000; opacity: 0.7;' : '';
+                    const deadlineText = status.deadline ? `<div style="font-size: 11px; opacity: 0.7;">기한: ${status.deadline}</div>` : '';
+                    
+                    return `
+                    <div style="background: rgba(255,255,255,0.2); padding: 10px; margin-bottom: 8px; border-radius: 5px; border-left: 3px solid white;">
+                        <div style="font-weight: bold; margin-bottom: 5px; ${completedStyle}">${status.completed ? '✅ ' : ''}${status.teamName}</div>
+                        <div style="font-size: 12px; opacity: 0.9; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; ${completedStyle}">${status.content}</div>
+                        <div style="font-size: 11px; opacity: 0.7;">작성: ${status.date}</div>
+                        ${deadlineText}
+                    </div>
+                `;
+                }).join('');
+            }
+        }
+
+        // 공지사항 삭제
+        function deleteNotice(id) {
+            if (!confirm('이 공지사항을 삭제하시겠습니까?')) return;
+            
+            notices = notices.filter(n => n.id !== id);
+            localStorage.setItem('notices', JSON.stringify(notices));
+            
+            showAlert('notices-alert', '공지사항이 삭제되었습니다.', 'success');
+            loadAllData();
+        }
+
+        // 팀별 업무현황 삭제
+        function deleteTeamStatus(id) {
+            if (!confirm('이 업무현황을 삭제하시겠습니까?')) return;
+            
+            teamStatuses = teamStatuses.filter(t => t.id !== id);
+            localStorage.setItem('teamStatuses', JSON.stringify(teamStatuses));
+            
+            showAlert('team-status-alert', '업무현황이 삭제되었습니다.', 'success');
+            loadAllData();
+        }
+
+        // 폼 초기화
+        function resetNoticeForm() {
+            document.getElementById('notice-form').reset();
+            setTodayDate();
+        }
+
+        function resetTeamStatusForm() {
+            document.getElementById('team-status-form').reset();
+            setTodayDate();
+        }
+
+        // 검색 기능
+        function searchNotices() {
+            const searchText = document.getElementById('notice-search').value.toLowerCase();
+            const rows = document.getElementById('notices-table').getElementsByTagName('tbody')[0].rows;
+            
+            Array.from(rows).forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchText) ? '' : 'none';
+            });
+        }
+
+        function searchTeamStatus() {
+            const searchText = document.getElementById('team-status-search').value.toLowerCase();
+            const rows = document.getElementById('team-status-table').getElementsByTagName('tbody')[0].rows;
+            
+            Array.from(rows).forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchText) ? '' : 'none';
+            });
+        }
+
+        // 엑셀 업로드
+        function uploadExcel() {
+            const fileInput = document.getElementById('excel-upload');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showAlert('materials-alert', '파일을 선택해주세요.', 'error');
+                return;
+            }
+            
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+                    
+                    // 첫 번째 행은 헤더로 간주하고 제외
+                    const rows = jsonData.slice(1);
+                    
+                    uploadedMaterials = [];
+                    let successCount = 0;
+                    let duplicateCount = 0;
+                    
+                    rows.forEach(row => {
+                        if (row.length >= 4 && row[0] && row[1] && row[2] && row[3]) {
+                            const materialData = {
+                                name: String(row[0]).trim(),
+                                spec: String(row[1]).trim(),
+                                unit: String(row[2]).trim(),
+                                contractQty: parseFloat(row[3]) || 0,
+                                note: row[4] ? String(row[4]).trim() : ''
+                            };
+                            
+                            // 중복 체크 (품명 + 규격이 같으면 중복)
+                            const isDuplicate = materials.some(m => 
+                                m.name === materialData.name && m.spec === materialData.spec
+                            );
+                            
+                            if (!isDuplicate) {
+                                // 자재 등록
+                                const newMaterial = {
+                                    id: Date.now() + successCount, // 고유 ID 생성
+                                    name: materialData.name,
+                                    spec: materialData.spec,
+                                    unit: materialData.unit,
+                                    contractQty: materialData.contractQty,
+                                    note: materialData.note
+                                };
+                                
+                                materials.push(newMaterial);
+                                uploadedMaterials.push(materialData);
+                                successCount++;
+                            } else {
+                                duplicateCount++;
+                            }
+                        }
+                    });
+                    
+                    if (successCount > 0) {
+                        // 로컬 스토리지에 저장
+                        localStorage.setItem('materials', JSON.stringify(materials));
+                        localStorage.setItem('uploadedMaterials', JSON.stringify(uploadedMaterials));
+                        
+                        // 화면 업데이트
+                        updateMaterialDatalist();
+                        loadAllData();
+                        
+                        let message = `${successCount}개의 자재가 자동으로 등록되었습니다.`;
+                        if (duplicateCount > 0) {
+                            message += ` (중복 ${duplicateCount}개 제외)`;
+                        }
+                        showAlert('materials-alert', message, 'success');
+                    } else if (duplicateCount > 0) {
+                        showAlert('materials-alert', `모든 자재가 이미 등록되어 있습니다. (중복 ${duplicateCount}개)`, 'warning');
+                    } else {
+                        showAlert('materials-alert', '유효한 데이터가 없습니다. 엑셀 형식을 확인해주세요.', 'error');
+                    }
+                    
+                    // 파일 입력 초기화
+                    fileInput.value = '';
+                    
+                } catch (error) {
+                    showAlert('materials-alert', '파일 읽기 오류: ' + error.message, 'error');
+                }
+            };
+            
+            reader.readAsArrayBuffer(file);
+        }
+
+        // 자재 데이터리스트 업데이트
+        function updateMaterialDatalist() {
+            const nameSelect = document.getElementById('mat-name');
+            const specSelect = document.getElementById('mat-spec');
+            const unitDatalist = document.getElementById('material-unit-list');
+            
+            // 기존 옵션 초기화 (첫 번째 옵션은 유지)
+            nameSelect.innerHTML = '<option value="">품명을 선택하세요</option>';
+            specSelect.innerHTML = '<option value="">규격을 선택하세요</option>';
+            unitDatalist.innerHTML = '';
+            
+            // 고유값만 추출
+            const uniqueNames = [...new Set(uploadedMaterials.map(m => m.name))];
+            const uniqueSpecs = [...new Set(uploadedMaterials.map(m => m.spec))];
+            const uniqueUnits = [...new Set(uploadedMaterials.map(m => m.unit))];
+            
+            // 품명 옵션 추가
+            uniqueNames.forEach(name => {
+                const option = document.createElement('option');
+                option.value = name;
+                option.textContent = name;
+                nameSelect.appendChild(option);
+            });
+            
+            // 규격 옵션 추가
+            uniqueSpecs.forEach(spec => {
+                const option = document.createElement('option');
+                option.value = spec;
+                option.textContent = spec;
+                specSelect.appendChild(option);
+            });
+            
+            // 단위 datalist 추가
+            uniqueUnits.forEach(unit => {
+                const option = document.createElement('option');
+                option.value = unit;
+                unitDatalist.appendChild(option);
+            });
+        }
+
+        // 품명 선택 시 규격 필터링 및 자동 완성
+        function onMaterialNameChange() {
+            const selectedName = document.getElementById('mat-name').value;
+            const specSelect = document.getElementById('mat-spec');
+            
+            // 규격 초기화
+            specSelect.innerHTML = '<option value="">규격을 선택하세요</option>';
+            
+            if (!selectedName) {
+                // 품명이 선택되지 않으면 모든 규격 표시
+                const uniqueSpecs = [...new Set(uploadedMaterials.map(m => m.spec))];
+                uniqueSpecs.forEach(spec => {
+                    const option = document.createElement('option');
+                    option.value = spec;
+                    option.textContent = spec;
+                    specSelect.appendChild(option);
+                });
+                return;
+            }
+            
+            // 선택된 품명에 해당하는 규격만 필터링
+            const filteredMaterials = uploadedMaterials.filter(m => m.name === selectedName);
+            const filteredSpecs = [...new Set(filteredMaterials.map(m => m.spec))];
+            
+            filteredSpecs.forEach(spec => {
+                const option = document.createElement('option');
+                option.value = spec;
+                option.textContent = spec;
+                specSelect.appendChild(option);
+            });
+            
+            // 해당 품명의 규격이 하나만 있으면 자동 선택하고 데이터 채우기
+            if (filteredSpecs.length === 1) {
+                specSelect.value = filteredSpecs[0];
+                fillMaterialData(selectedName, filteredSpecs[0]);
+            }
+        }
+
+        // 규격 선택 시 자동 완성
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('mat-spec').addEventListener('change', function() {
+                const selectedName = document.getElementById('mat-name').value;
+                const selectedSpec = this.value;
+                
+                if (selectedName && selectedSpec) {
+                    fillMaterialData(selectedName, selectedSpec);
+                }
+            });
+        });
+
+        // 자재 데이터 자동 채우기
+        function fillMaterialData(name, spec) {
+            const matchedMaterial = uploadedMaterials.find(m => m.name === name && m.spec === spec);
+            
+            if (matchedMaterial) {
+                document.getElementById('mat-unit').value = matchedMaterial.unit;
+                document.getElementById('mat-quantity').value = matchedMaterial.contractQty;
+                document.getElementById('mat-note').value = matchedMaterial.note;
+            }
+        }
+
+        // 기존 품명 자동완성 코드 제거 (이미 위에서 처리)
+        /* document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('mat-name').addEventListener('input', function() {
+                const selectedName = this.value;
+                const matchedMaterial = uploadedMaterials.find(m => m.name === selectedName);
+                
+                if (matchedMaterial) {
+                    document.getElementById('mat-spec').value = matchedMaterial.spec;
+                    document.getElementById('mat-unit').value = matchedMaterial.unit;
+                    document.getElementById('mat-quantity').value = matchedMaterial.contractQty;
+                    document.getElementById('mat-note').value = matchedMaterial.note;
+                }
+            });
+        }); */
+
+        // 탭 전환
+        function showTab(tabName) {
+            const tabs = document.querySelectorAll('.tab');
+            const contents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => tab.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+            
+            // 클릭된 탭 찾기
+            const clickedTab = Array.from(tabs).find(tab => 
+                tab.getAttribute('onclick') && tab.getAttribute('onclick').includes(tabName)
+            );
+            if (clickedTab) clickedTab.classList.add('active');
+            
+            document.getElementById(tabName).classList.add('active');
+            
+            // 특정 탭만 로드 (버퍼링 개선)
+            switch(tabName) {
+                case 'dashboard':
+                    loadDashboardNotices();
+                    loadDashboardTeamStatuses();
+                    updateDashboard();
+                    break;
+                case 'notices':
+                    loadNotices();
+                    break;
+                case 'team-status':
+                    loadTeamStatuses();
+                    break;
+                case 'materials':
+                    loadMaterials();
+                    break;
+                case 'incoming':
+                    loadIncoming();
+                    updateMaterialSelects();
+                    break;
+                case 'outgoing':
+                    loadOutgoing();
+                    updateOutgoingMaterialSelects();
+                    break;
+                case 'history':
+                    loadHistory();
+                    break;
+            }
+        }
+
+        // 모든 데이터 로드
+        function loadAllData() {
+            loadMaterials();
+            loadIncoming();
+            loadOutgoing();
+            loadHistory();
+            loadNotices();
+            loadTeamStatuses();
+            loadDashboardNotices();
+            loadDashboardTeamStatuses();
+            updateDashboard();
+            updateMaterialSelects();
+        }
+
+        // 자재 등록
+        document.getElementById('material-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const material = {
+                id: Date.now(),
+                name: document.getElementById('mat-name').value,
+                spec: document.getElementById('mat-spec').value,
+                unit: document.getElementById('mat-unit').value,
+                contractQty: parseFloat(document.getElementById('mat-quantity').value),
+                note: document.getElementById('mat-note').value
+            };
+            
+            materials.push(material);
+            localStorage.setItem('materials', JSON.stringify(materials));
+            
+            showAlert('materials-alert', '자재가 성공적으로 등록되었습니다.', 'success');
+            resetMaterialForm();
+            loadMaterials();
+            updateMaterialSelects();
+            updateOutgoingMaterialSelects();
+        });
+
+        // 입고 등록
+        document.getElementById('incoming-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const materialName = document.getElementById('in-material-name').value;
+            const materialSpec = document.getElementById('in-material-spec').value;
+            const material = materials.find(m => m.name === materialName && m.spec === materialSpec);
+            
+            if (!material) {
+                showAlert('incoming-alert', '선택한 자재를 찾을 수 없습니다.', 'error');
+                return;
+            }
+            
+            const record = {
+                id: Date.now(),
+                materialId: material.id,
+                date: document.getElementById('in-date').value,
+                quantity: parseFloat(document.getElementById('in-quantity').value),
+                note: document.getElementById('in-note').value
+            };
+            
+            incoming.push(record);
+            localStorage.setItem('incoming', JSON.stringify(incoming));
+            
+            showAlert('incoming-alert', '입고가 성공적으로 등록되었습니다.', 'success');
+            resetIncomingForm();
+            loadIncoming();
+            updateOutgoingMaterialSelects(); // 출고 자재 목록도 업데이트
+        });
+
+        // 사용(출고) 등록
+        document.getElementById('outgoing-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const materialName = document.getElementById('out-material-name').value;
+            const materialSpec = document.getElementById('out-material-spec').value;
+            const material = materials.find(m => m.name === materialName && m.spec === materialSpec);
+            
+            if (!material) {
+                showAlert('outgoing-alert', '선택한 자재를 찾을 수 없습니다.', 'error');
+                return;
+            }
+            
+            const quantity = parseFloat(document.getElementById('out-quantity').value);
+            
+            // 재고 확인
+            const available = getAvailableQuantity(material.id);
+            if (quantity > available) {
+                showAlert('outgoing-alert', `재고가 부족합니다. 현재 잔여 수량: ${available}`, 'error');
+                return;
+            }
+            
+            const record = {
+                id: Date.now(),
+                materialId: material.id,
+                date: document.getElementById('out-date').value,
+                quantity: quantity,
+                note: document.getElementById('out-note').value
+            };
+            
+            outgoing.push(record);
+            localStorage.setItem('outgoing', JSON.stringify(outgoing));
+            
+            showAlert('outgoing-alert', '사용(출고)이 성공적으로 등록되었습니다.', 'success');
+            resetOutgoingForm();
+            loadOutgoing();
+        });
+
+        // 자재 목록 로드
+        function loadMaterials() {
+            const tbody = document.getElementById('materials-table').getElementsByTagName('tbody')[0];
+            tbody.innerHTML = '';
+            
+            materials.forEach((material, index) => {
+                const incomingQty = getIncomingQuantity(material.id);
+                const outgoingQty = getOutgoingQuantity(material.id);
+                const remaining = incomingQty - outgoingQty;
+                
+                const row = tbody.insertRow();
+                const isLowStock = remaining < material.contractQty * 0.2;
+                if (isLowStock) row.classList.add('low-stock');
+                
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${material.name}</td>
+                    <td>${material.spec}</td>
+                    <td>${material.unit}</td>
+                    <td>${material.contractQty.toLocaleString()}</td>
+                    <td>${incomingQty.toLocaleString()}</td>
+                    <td>${outgoingQty.toLocaleString()}</td>
+                    <td>${remaining.toLocaleString()}</td>
+                    <td>${material.note}</td>
+                    <td class="action-btns">
+                        <button class="action-btn btn-warning" onclick="editMaterial(${material.id})">수정</button>
+                        <button class="action-btn btn-danger" onclick="deleteMaterial(${material.id})">삭제</button>
+                    </td>
+                `;
+            });
+        }
+
+        // 입고 내역 로드
+        function loadIncoming() {
+            const tbody = document.getElementById('incoming-table').getElementsByTagName('tbody')[0];
+            tbody.innerHTML = '';
+            
+            incoming.forEach((record, index) => {
+                const material = materials.find(m => m.id === record.materialId);
+                if (!material) return;
+                
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${material.name}</td>
+                    <td>${material.spec}</td>
+                    <td>${material.unit}</td>
+                    <td>${record.date}</td>
+                    <td>${record.quantity.toLocaleString()}</td>
+                    <td>${record.note}</td>
+                    <td class="action-btns">
+                        <button class="action-btn btn-danger" onclick="deleteIncoming(${record.id})">삭제</button>
+                    </td>
+                `;
+            });
+        }
+
+        // 사용(출고) 내역 로드
+        function loadOutgoing() {
+            const tbody = document.getElementById('outgoing-table').getElementsByTagName('tbody')[0];
+            tbody.innerHTML = '';
+            
+            outgoing.forEach((record, index) => {
+                const material = materials.find(m => m.id === record.materialId);
+                if (!material) return;
+                
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${material.name}</td>
+                    <td>${material.spec}</td>
+                    <td>${material.unit}</td>
+                    <td>${record.date}</td>
+                    <td>${record.quantity.toLocaleString()}</td>
+                    <td>${record.note}</td>
+                    <td class="action-btns">
+                        <button class="action-btn btn-danger" onclick="deleteOutgoing(${record.id})">삭제</button>
+                    </td>
+                `;
+            });
+        }
+
+        // 전체 내역 로드
+        function loadHistory() {
+            const tbody = document.getElementById('history-table').getElementsByTagName('tbody')[0];
+            tbody.innerHTML = '';
+            
+            materials.forEach((material, index) => {
+                const incomingRecords = incoming.filter(i => i.materialId === material.id);
+                const outgoingRecords = outgoing.filter(o => o.materialId === material.id);
+                
+                const incomingQty = getIncomingQuantity(material.id);
+                const outgoingQty = getOutgoingQuantity(material.id);
+                const remaining = incomingQty - outgoingQty;
+                
+                // 입고/출고 내역이 있는 경우
+                const maxRecords = Math.max(incomingRecords.length, outgoingRecords.length, 1);
+                
+                for (let i = 0; i < maxRecords; i++) {
+                    const inRecord = incomingRecords[i];
+                    const outRecord = outgoingRecords[i];
+                    
+                    const row = tbody.insertRow();
+                    row.innerHTML = `
+                        <td>${i === 0 ? index + 1 : ''}</td>
+                        <td>${i === 0 ? material.name : ''}</td>
+                        <td>${i === 0 ? material.spec : ''}</td>
+                        <td>${i === 0 ? material.unit : ''}</td>
+                        <td>${i === 0 ? material.contractQty.toLocaleString() : ''}</td>
+                        <td>${inRecord ? inRecord.date : ''}</td>
+                        <td>${inRecord ? inRecord.quantity.toLocaleString() : ''}</td>
+                        <td>${outRecord ? outRecord.date : ''}</td>
+                        <td>${outRecord ? outRecord.quantity.toLocaleString() : ''}</td>
+                        <td>${i === 0 ? remaining.toLocaleString() : ''}</td>
+                        <td>${i === 0 ? material.note : ''}</td>
+                    `;
+                }
+            });
+        }
+
+        // 대시보드 업데이트
+        function updateDashboard() {
+            // 자재 현황 테이블 - 입출고 내역이 있는 자재만 표시
+            const tbody = document.getElementById('low-stock-table').getElementsByTagName('tbody')[0];
+            tbody.innerHTML = '';
+            
+            // 입출고 내역이 있는 자재만 필터링
+            const materialsWithHistory = materials.filter(material => {
+                const incomingQty = getIncomingQuantity(material.id);
+                const outgoingQty = getOutgoingQuantity(material.id);
+                return incomingQty > 0 || outgoingQty > 0;
+            });
+            
+            materialsWithHistory.forEach((material, index) => {
+                const incomingQty = getIncomingQuantity(material.id);
+                const outgoingQty = getOutgoingQuantity(material.id);
+                const remaining = incomingQty - outgoingQty;
+                const percentage = incomingQty > 0 ? ((incomingQty - remaining) / incomingQty * 100).toFixed(1) : 0;
+                
+                const row = tbody.insertRow();
+                // 재고 부족 시 하이라이트 (입고수량 대비 잔여수량이 20% 미만)
+                if (incomingQty > 0 && remaining < incomingQty * 0.2) {
+                    row.classList.add('low-stock');
+                }
+                
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${material.name}</td>
+                    <td>${material.spec}</td>
+                    <td>${material.unit}</td>
+                    <td>${material.contractQty.toLocaleString()}</td>
+                    <td>${incomingQty.toLocaleString()}</td>
+                    <td>${outgoingQty.toLocaleString()}</td>
+                    <td>${remaining.toLocaleString()}</td>
+                    <td>${percentage}%</td>
+                    <td>${material.note}</td>
+                `;
+            });
+            
+            if (materialsWithHistory.length === 0) {
+                const row = tbody.insertRow();
+                row.innerHTML = '<td colspan="10" style="text-align: center; padding: 30px;">입출고 내역이 있는 자재가 없습니다.</td>';
+            }
+        }
+
+        // 자재 선택 드롭다운 업데이트 (입고 관리용)
+        function updateMaterialSelects() {
+            const inNameSelect = document.getElementById('in-material-name');
+            const inSpecSelect = document.getElementById('in-material-spec');
+            
+            // 초기화
+            inNameSelect.innerHTML = '<option value="">품명을 선택하세요</option>';
+            inSpecSelect.innerHTML = '<option value="">규격을 선택하세요</option>';
+            
+            // 고유 품명 추출
+            const uniqueNames = [...new Set(materials.map(m => m.name))];
+            
+            uniqueNames.forEach(name => {
+                const option = document.createElement('option');
+                option.value = name;
+                option.textContent = name;
+                inNameSelect.appendChild(option);
+            });
+        }
+
+        // 자재 선택 드롭다운 업데이트 (출고 관리용 - 입고된 자재만)
+        function updateOutgoingMaterialSelects() {
+            const outNameSelect = document.getElementById('out-material-name');
+            const outSpecSelect = document.getElementById('out-material-spec');
+            
+            // 초기화
+            outNameSelect.innerHTML = '<option value="">품명을 선택하세요</option>';
+            outSpecSelect.innerHTML = '<option value="">규격을 선택하세요</option>';
+            
+            // 입고 수량이 있는 자재만 필터링
+            const materialsWithIncoming = materials.filter(m => {
+                const incomingQty = getIncomingQuantity(m.id);
+                return incomingQty > 0;
+            });
+            
+            // 고유 품명 추출
+            const uniqueNames = [...new Set(materialsWithIncoming.map(m => m.name))];
+            
+            uniqueNames.forEach(name => {
+                const option = document.createElement('option');
+                option.value = name;
+                option.textContent = name;
+                outNameSelect.appendChild(option);
+            });
+        }
+
+        // 입고 - 품명 선택 시 규격 필터링
+        function onIncomingNameChange() {
+            const selectedName = document.getElementById('in-material-name').value;
+            const specSelect = document.getElementById('in-material-spec');
+            
+            specSelect.innerHTML = '<option value="">규격을 선택하세요</option>';
+            
+            if (!selectedName) return;
+            
+            const filteredMaterials = materials.filter(m => m.name === selectedName);
+            const filteredSpecs = [...new Set(filteredMaterials.map(m => m.spec))];
+            
+            filteredSpecs.forEach(spec => {
+                const option = document.createElement('option');
+                option.value = spec;
+                option.textContent = spec;
+                specSelect.appendChild(option);
+            });
+            
+            if (filteredSpecs.length === 1) {
+                specSelect.value = filteredSpecs[0];
+            }
+        }
+
+        // 입고 - 규격 선택 완료
+        function onIncomingSpecChange() {
+            // 필요 시 추가 동작 구현
+        }
+
+        // 출고 - 품명 선택 시 규격 필터링 (입고된 자재만)
+        function onOutgoingNameChange() {
+            const selectedName = document.getElementById('out-material-name').value;
+            const specSelect = document.getElementById('out-material-spec');
+            
+            specSelect.innerHTML = '<option value="">규격을 선택하세요</option>';
+            
+            if (!selectedName) return;
+            
+            // 입고 수량이 있는 자재만 필터링
+            const materialsWithIncoming = materials.filter(m => {
+                const incomingQty = getIncomingQuantity(m.id);
+                return m.name === selectedName && incomingQty > 0;
+            });
+            
+            const filteredSpecs = [...new Set(materialsWithIncoming.map(m => m.spec))];
+            
+            filteredSpecs.forEach(spec => {
+                const option = document.createElement('option');
+                option.value = spec;
+                option.textContent = spec;
+                specSelect.appendChild(option);
+            });
+            
+            if (filteredSpecs.length === 1) {
+                specSelect.value = filteredSpecs[0];
+            }
+        }
+
+        // 출고 - 규격 선택 완료
+        function onOutgoingSpecChange() {
+            // 필요 시 추가 동작 구현
+        }
+
+        // 입고 수량 계산
+        function getIncomingQuantity(materialId) {
+            return incoming
+                .filter(i => i.materialId === materialId)
+                .reduce((sum, i) => sum + i.quantity, 0);
+        }
+
+        // 출고 수량 계산
+        function getOutgoingQuantity(materialId) {
+            return outgoing
+                .filter(o => o.materialId === materialId)
+                .reduce((sum, o) => sum + o.quantity, 0);
+        }
+
+        // 잔여 수량 계산
+        function getAvailableQuantity(materialId) {
+            return getIncomingQuantity(materialId) - getOutgoingQuantity(materialId);
+        }
+
+        // 자재 삭제
+        function deleteMaterial(id) {
+            if (!confirm('이 자재를 삭제하시겠습니까?\n관련된 모든 입출고 내역도 함께 삭제됩니다.')) return;
+            
+            materials = materials.filter(m => m.id !== id);
+            incoming = incoming.filter(i => i.materialId !== id);
+            outgoing = outgoing.filter(o => o.materialId !== id);
+            
+            localStorage.setItem('materials', JSON.stringify(materials));
+            localStorage.setItem('incoming', JSON.stringify(incoming));
+            localStorage.setItem('outgoing', JSON.stringify(outgoing));
+            
+            showAlert('materials-alert', '자재가 삭제되었습니다.', 'success');
+            loadAllData();
+        }
+
+        // 입고 삭제
+        function deleteIncoming(id) {
+            if (!confirm('이 입고 내역을 삭제하시겠습니까?')) return;
+            
+            incoming = incoming.filter(i => i.id !== id);
+            localStorage.setItem('incoming', JSON.stringify(incoming));
+            
+            showAlert('incoming-alert', '입고 내역이 삭제되었습니다.', 'success');
+            loadAllData();
+        }
+
+        // 출고 삭제
+        function deleteOutgoing(id) {
+            if (!confirm('이 사용(출고) 내역을 삭제하시겠습니까?')) return;
+            
+            outgoing = outgoing.filter(o => o.id !== id);
+            localStorage.setItem('outgoing', JSON.stringify(outgoing));
+            
+            showAlert('outgoing-alert', '사용(출고) 내역이 삭제되었습니다.', 'success');
+            loadAllData();
+        }
+
+        // 폼 초기화
+        function resetMaterialForm() {
+            document.getElementById('material-form').reset();
+            // select 박스를 초기 상태로
+            document.getElementById('mat-name').value = '';
+            document.getElementById('mat-spec').value = '';
+            // 규격 옵션 다시 로드
+            updateMaterialDatalist();
+        }
+
+        function resetIncomingForm() {
+            document.getElementById('incoming-form').reset();
+            document.getElementById('in-material-name').value = '';
+            document.getElementById('in-material-spec').value = '';
+            setTodayDate();
+            updateMaterialSelects();
+        }
+
+        function resetOutgoingForm() {
+            document.getElementById('outgoing-form').reset();
+            document.getElementById('out-material-name').value = '';
+            document.getElementById('out-material-spec').value = '';
+            setTodayDate();
+            updateOutgoingMaterialSelects();
+        }
+
+        // 검색 기능
+        function searchMaterials() {
+            const searchText = document.getElementById('material-search').value.toLowerCase();
+            const rows = document.getElementById('materials-table').getElementsByTagName('tbody')[0].rows;
+            
+            Array.from(rows).forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchText) ? '' : 'none';
+            });
+        }
+
+        function searchIncoming() {
+            const searchText = document.getElementById('incoming-search').value.toLowerCase();
+            const rows = document.getElementById('incoming-table').getElementsByTagName('tbody')[0].rows;
+            
+            Array.from(rows).forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchText) ? '' : 'none';
+            });
+        }
+
+        function searchOutgoing() {
+            const searchText = document.getElementById('outgoing-search').value.toLowerCase();
+            const rows = document.getElementById('outgoing-table').getElementsByTagName('tbody')[0].rows;
+            
+            Array.from(rows).forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchText) ? '' : 'none';
+            });
+        }
+
+        function searchHistory() {
+            const searchText = document.getElementById('history-search').value.toLowerCase();
+            const rows = document.getElementById('history-table').getElementsByTagName('tbody')[0].rows;
+            
+            Array.from(rows).forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchText) ? '' : 'none';
+            });
+        }
+
+        // 알림 표시
+        function showAlert(elementId, message, type) {
+            const alert = document.getElementById(elementId);
+            alert.textContent = message;
+            alert.className = `alert ${type}`;
+            alert.style.display = 'block';
+            
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 3000);
+        }
+
+        // Excel 다운로드
+        function exportToExcel(type) {
+            let csvContent = '';
+            let filename = '';
+            
+            switch(type) {
+                case 'materials':
+                    csvContent = '번호,품명,규격,단위,계약수량,입고수량,사용수량,잔여수량,비고\n';
+                    materials.forEach((material, index) => {
+                        const incomingQty = getIncomingQuantity(material.id);
+                        const outgoingQty = getOutgoingQuantity(material.id);
+                        const remaining = incomingQty - outgoingQty;
+                        csvContent += `${index + 1},${material.name},${material.spec},${material.unit},${material.contractQty},${incomingQty},${outgoingQty},${remaining},${material.note}\n`;
+                    });
+                    filename = '자재목록.csv';
+                    break;
+                    
+                case 'incoming':
+                    csvContent = '번호,품명,규격,단위,입고일,입고수량,비고\n';
+                    incoming.forEach((record, index) => {
+                        const material = materials.find(m => m.id === record.materialId);
+                        if (material) {
+                            csvContent += `${index + 1},${material.name},${material.spec},${material.unit},${record.date},${record.quantity},${record.note}\n`;
+                        }
+                    });
+                    filename = '입고내역.csv';
+                    break;
+                    
+                case 'outgoing':
+                    csvContent = '번호,품명,규격,단위,사용일,사용수량,비고\n';
+                    outgoing.forEach((record, index) => {
+                        const material = materials.find(m => m.id === record.materialId);
+                        if (material) {
+                            csvContent += `${index + 1},${material.name},${material.spec},${material.unit},${record.date},${record.quantity},${record.note}\n`;
+                        }
+                    });
+                    filename = '사용내역.csv';
+                    break;
+                    
+                case 'history':
+                    csvContent = '번호,품명,규격,단위,계약수량,입고일,입고수량,사용일,사용수량,잔여수량,비고\n';
+                    materials.forEach((material, index) => {
+                        const incomingRecords = incoming.filter(i => i.materialId === material.id);
+                        const outgoingRecords = outgoing.filter(o => o.materialId === material.id);
+                        const remaining = getAvailableQuantity(material.id);
+                        
+                        const maxRecords = Math.max(incomingRecords.length, outgoingRecords.length, 1);
+                        
+                        for (let i = 0; i < maxRecords; i++) {
+                            const inRecord = incomingRecords[i];
+                            const outRecord = outgoingRecords[i];
+                            
+                            csvContent += `${i === 0 ? index + 1 : ''},`;
+                            csvContent += `${i === 0 ? material.name : ''},`;
+                            csvContent += `${i === 0 ? material.spec : ''},`;
+                            csvContent += `${i === 0 ? material.unit : ''},`;
+                            csvContent += `${i === 0 ? material.contractQty : ''},`;
+                            csvContent += `${inRecord ? inRecord.date : ''},`;
+                            csvContent += `${inRecord ? inRecord.quantity : ''},`;
+                            csvContent += `${outRecord ? outRecord.date : ''},`;
+                            csvContent += `${outRecord ? outRecord.quantity : ''},`;
+                            csvContent += `${i === 0 ? remaining : ''},`;
+                            csvContent += `${i === 0 ? material.note : ''}\n`;
+                        }
+                    });
+                    filename = '전체내역.csv';
+                    break;
+            }
+            
+            const BOM = '\uFEFF';
+            const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+        }
+    </script>
+</body>
+</html>
