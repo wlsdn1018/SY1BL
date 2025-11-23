@@ -1032,21 +1032,41 @@
         function playNotificationSound() {
             if (!notificationsEnabled) return;
             
-            // 간단한 알림음 생성
+            // 더 크고 긴 알림음 생성
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
             
             oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
             
-            oscillator.frequency.value = 800;
+            // 주파수와 볼륨 증가
+            oscillator.frequency.value = 880; // 더 높은 음
             oscillator.type = 'sine';
             
-            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            // 볼륨을 0.3에서 0.7로 증가 (더 크게)
+            gainNode.gain.setValueAtTime(0.7, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
             
             oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 0.3);
+            oscillator.stop(audioContext.currentTime + 0.8);
+            
+            // 두 번째 음 추가 (더블 알림)
+            setTimeout(() => {
+                const oscillator2 = audioContext.createOscillator();
+                const gainNode2 = audioContext.createGain();
+                
+                oscillator2.connect(gainNode2);
+                gainNode2.connect(audioContext.destination);
+                
+                oscillator2.frequency.value = 1100;
+                oscillator2.type = 'sine';
+                
+                gainNode2.gain.setValueAtTime(0.7, audioContext.currentTime);
+                gainNode2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
+                
+                oscillator2.start(audioContext.currentTime);
+                oscillator2.stop(audioContext.currentTime + 0.8);
+            }, 100);
         }
 
         // 진동 (모바일)
@@ -1054,7 +1074,8 @@
             if (!notificationsEnabled) return;
             
             if (navigator.vibrate) {
-                navigator.vibrate([200, 100, 200]); // 짧은 진동 패턴
+                // 더 긴 진동 패턴 (총 2초)
+                navigator.vibrate([300, 150, 300, 150, 400]);
             }
         }
 
@@ -1080,10 +1101,10 @@
             playNotificationSound();
             vibrate();
             
-            // 3초 후 자동 숨김
+            // 5초 후 자동 숨김 (3초에서 5초로 증가)
             setTimeout(() => {
                 toast.classList.remove('show');
-            }, 3000);
+            }, 5000);
         }
 
         // 알림 토글
